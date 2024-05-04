@@ -31,7 +31,7 @@ gryImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 ret, mask = cv2.threshold(gryImg, 1, 255, cv2.THRESH_BINARY)
 
 # Here is code for Canvas setup
-paintWindow = np.zeros((471,636,3)) + 255
+paintWindow = np.zeros((500,650,3)) + 255    #set rgb to 255 (white)
 paintWindow = cv2.rectangle(paintWindow, (40,1), (140,65), (0,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (160,1), (255,65), (255,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (275,1), (370,65), (0,255,0), 2)
@@ -45,11 +45,15 @@ cv2.putText(paintWindow, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0,
 cv2.putText(paintWindow, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 cv2.namedWindow('Paint', cv2.WINDOW_AUTOSIZE)
 
+
 # initialize mediapipe
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 mpDraw = mp.solutions.drawing_utils
 
+red = 0
+green = 0
+blue = 255
 
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
@@ -65,7 +69,7 @@ while ret:
 
     # Flip the frame vertically
     frame = cv2.flip(frame, 1)
-    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    #hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     frame = cv2.rectangle(frame, (40,1), (140,65), (0,0,0), 2)
@@ -78,6 +82,7 @@ while ret:
     cv2.putText(frame, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
+    #frame = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
     # Get hand landmark prediction
     result = hands.process(framergb)
@@ -95,6 +100,7 @@ while ret:
 
                 landmarks.append([lmx, lmy])
 
+
             # Drawing landmarks on frames
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
         sum_x = sum(lm[0] for lm in landmarks)
@@ -104,9 +110,8 @@ while ret:
         avg_position = (int(avg_x), int(avg_y))        
         center = avg_position
         thumb = (landmarks[4][0],landmarks[4][1])
-        cv2.circle(frame, center, 3, (0,255,0),10)
-
-        print(center[1]-thumb[1])
+        cv2.circle(frame, center, 3, (blue,green,red), 10)
+        # when palm is closed
         if (thumb[1]-center[1]<30):
             bpoints.append(deque(maxlen=512))
             blue_index += 1
@@ -116,14 +121,14 @@ while ret:
             red_index += 1
             ypoints.append(deque(maxlen=512))
             yellow_index += 1
-
+        # when palm is open
         elif center[1] <= 65:
             if 40 <= center[0] <= 140: # Clear Button
                 bpoints = [deque(maxlen=512)]
                 gpoints = [deque(maxlen=512)]
                 rpoints = [deque(maxlen=512)]
                 ypoints = [deque(maxlen=512)]
-
+            
                 blue_index = 0
                 green_index = 0
                 red_index = 0
@@ -132,12 +137,25 @@ while ret:
                 paintWindow[67:,:,:] = 255
             elif 160 <= center[0] <= 255:
                     colorIndex = 0 # Blue
+                    # set cursor RGB value (BGR)
+                    red = 0
+                    green = 0
+                    blue = 255
             elif 275 <= center[0] <= 370:
                     colorIndex = 1 # Green
+                    red = 0
+                    green = 255
+                    blue = 0
             elif 390 <= center[0] <= 485:
                     colorIndex = 2 # Red
+                    red = 255
+                    green = 0
+                    blue = 0
             elif 505 <= center[0] <= 600:
                     colorIndex = 3 # Yellow
+                    red = 255
+                    green = 255
+                    blue = 0
         else :
             if colorIndex == 0:
                 bpoints[blue_index].appendleft(center)
@@ -170,7 +188,9 @@ while ret:
             for k in range(1, len(points[i][j])):
                 if points[i][j][k - 1] is None or points[i][j][k] is None:
                     continue
-                cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
+                cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[i], 2)
+                if not center[1] <= 65:
+                    cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
                 
 
     cv2.imshow("Output", frame) 
