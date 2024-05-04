@@ -3,6 +3,14 @@ import cv2
 import numpy as np
 import mediapipe as mp
 from collections import deque
+import time
+import os
+import re
+
+
+countdown_time = 15
+
+start_time = time.time()
 
 
 # Giving different arrays to handle colour points of different colour
@@ -26,6 +34,7 @@ colorIndex = 0
 
 # Here is code for Canvas setup
 paintWindow = np.zeros((471,636,3)) + 255
+cursorframe = np.zeros_like(paintWindow)
 paintWindow = cv2.rectangle(paintWindow, (40,1), (140,65), (0,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (160,1), (255,65), (255,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (275,1), (370,65), (0,255,0), 2)
@@ -48,15 +57,33 @@ mpDraw = mp.solutions.drawing_utils
 
 # Initialize the webcam
 cap = cv2.VideoCapture(0)
-ret = True
+ret = True  
+
 while ret:
     # Read each frame from the webcam
-    ret, frame = cap.read()
-
-    x, y, c = frame.shape
-
+    ret, frame= cap.read()
+    current_time = time.time()
+    # Calculate the remaining time
+    remaining_time = countdown_time - int(current_time - start_time)
     # Flip the frame vertically
     frame = cv2.flip(frame, 1)
+    # Display the remaining time in the top right corner of the frame
+    cv2.putText(frame, str(remaining_time), (frame.shape[1] - 50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    # Check if the countdown has ended
+    if remaining_time <= 0:
+        print("Finished")
+        finished_image = cv2.imread("finished.jpg")
+        cv2.imshow("Paint", finished_image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+        break 
+    if(remaining_time == 1):
+         print("1 second remaining")
+         cv2.imwrite('paintWindow'+str(2)+'.png', paintWindow)
+    #making a cursor overframe
+    cursorframe.fill(230)
+    x, y, c = frame.shape
     #hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -95,12 +122,11 @@ while ret:
         sum_y = sum(lm[1] for lm in landmarks)
         avg_x = sum_x /len(landmarks)
         avg_y = sum_y /len(landmarks)
-        avg_position = (int(avg_x), int(avg_y))        
+        avg_position = (int(avg_x), int(avg_y))    
         center = avg_position
         thumb = (landmarks[4][0],landmarks[4][1])
         cv2.circle(frame, center, 3, (0,255,0),10)
-        cv2.circle(paintWindow, center, 3, (0,255,0),10)
-        print(center[1]-thumb[1])
+        cv2.circle(cursorframe, center, 3, (0,0,0),10)
         if (thumb[1]-center[1]<30):
             bpoints.append(deque(maxlen=512))
             blue_index += 1
@@ -151,7 +177,7 @@ while ret:
         red_index += 1
         ypoints.append(deque(maxlen=512))
         yellow_index += 1
-
+    displayFrame = cv2.addWeighted(paintWindow,0.9,cursorframe,0.1,0)
     # Draw lines of all the colors on the canvas and frame
     points = [bpoints, gpoints, rpoints, ypoints]
     # for j in range(len(points[0])):
@@ -162,14 +188,11 @@ while ret:
     for i in range(len(points)):
         for j in range(len(points[i])):
             for k in range(1, len(points[i][j])):
-                if points[i][j][k - 1] is None or points[i][j][k] is None:
+                if (points[i][j][k - 1] is None or points[i][j][k] is None):
                     continue
                 cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
-                
-
     cv2.imshow("Output", frame) 
     cv2.imshow("Paint", paintWindow)
-
     if cv2.waitKey(1) == ord('q'):
         break
 
