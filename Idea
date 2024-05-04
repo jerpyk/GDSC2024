@@ -1,0 +1,8 @@
+Drawing game, where you get a prompt(ex. a rocket ship and then u try to draw the rocket ship)
+
+The twist is that u have to draw it using ur body, your hands are like brushes, open hand is a brush, fist is an eraser.
+
+//********************************  STUFF TO DO AFTER IT WORKS  ******************************/
+
+- store photos in a database. 
+- have ai predict how well someone has drawn the image, and give it a score.

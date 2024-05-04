@@ -80,7 +80,7 @@ while ret:
         landmarks = []
         for handslms in result.multi_hand_landmarks:
             for lm in handslms.landmark:
-                # # print(id, lm)
+                # print(id, lm)
                 # print(lm.x)
                 # print(lm.y)
                 lmx = int(lm.x * 640)
@@ -91,10 +91,15 @@ while ret:
 
             # Drawing landmarks on frames
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
-        fore_finger = (landmarks[8][0],landmarks[8][1])
-        center = fore_finger
+        sum_x = sum(lm[0] for lm in landmarks)
+        sum_y = sum(lm[1] for lm in landmarks)
+        avg_x = sum_x /len(landmarks)
+        avg_y = sum_y /len(landmarks)
+        avg_position = (int(avg_x), int(avg_y))        
+        center = avg_position
         thumb = (landmarks[4][0],landmarks[4][1])
-        cv2.circle(frame, center, 3, (0,255,0),-1)
+        cv2.circle(frame, center, 3, (0,255,0),10)
+        cv2.circle(paintWindow, center, 3, (0,255,0),10)
         print(center[1]-thumb[1])
         if (thumb[1]-center[1]<30):
             bpoints.append(deque(maxlen=512))
@@ -159,8 +164,8 @@ while ret:
             for k in range(1, len(points[i][j])):
                 if points[i][j][k - 1] is None or points[i][j][k] is None:
                     continue
-                cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[i], 2)
                 cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
+                
 
     cv2.imshow("Output", frame) 
     cv2.imshow("Paint", paintWindow)
