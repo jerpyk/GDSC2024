@@ -75,12 +75,10 @@ while ret:
         print("Finished")
         finished_image = cv2.imread("finished.jpg")
         cv2.imshow("Paint", finished_image)
-        cv2.waitKey(0)
         cv2.destroyAllWindows()
-        break 
-    if(remaining_time == 1):
-         print("1 second remaining")
-         cv2.imwrite('paintWindow'+str(2)+'.png', paintWindow)
+        cv2.imwrite('paintWindow'+str(2)+'.png', paintWindow)
+        cap.release()
+        exit() 
     #making a cursor overframe
     cursorframe.fill(230)
     x, y, c = frame.shape
