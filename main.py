@@ -1,77 +1,13 @@
-<<<<<<< Updated upstream
-=======
-import sqlite3
->>>>>>> Stashed changes
 import cv2
 import numpy as np
 import mediapipe as mp
 from collections import deque
 import time
-<<<<<<< Updated upstream
-=======
-import os
-import uuid
-import math
-import numpy as np
-# timer 
-countdown_time = 30
-start_time = time.time()
-
-
-# Function to insert images into the database
-def insert_image(cur, filename):
-    with open(filename, 'rb') as input_file:
-        ablob = input_file.read()
-        base = os.path.basename(filename)
-        afile, ext = os.path.splitext(base)
-        sql = '''INSERT INTO images
-                  (filename, data) VALUES(?,?)'''
-        cur.execute(sql, (afile, sqlite3.Binary(ablob)))
-        con.commit()
-        
-# display images from the database
-def display_images(con):
-    cur = con.cursor()
-    cur.execute("SELECT filename, data FROM images")
-    rows = cur.fetchall()
-
-    images = []
-    for row in rows:
-        filename, data = row
-        with open(filename, 'wb') as file:
-            file.write(data)
-        image = cv2.imread(filename)
-        resized_image = cv2.resize(image, (200, 200))  # resize each image to 200x200
-        images.append(resized_image)
-        os.remove(filename)  # remove the file after using it
-
-    # Concatenate all images into one image
-    concatenated_image = np.concatenate(images, axis=1)
-
-    # Display the concatenated image
-    cv2.imshow('Images', concatenated_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-# end of all function definitions
-countdown_time = 15
->>>>>>> Stashed changes
 
 # timer 
 countdown_time = 30
 start_time = time.time()
 
-<<<<<<< Updated upstream
-=======
-#starting to build the database
-con = sqlite3.connect('images.db')
-cur = con.cursor()
-cur.execute('''
-	CREATE TABLE IF NOT EXISTS images (
-		filename TEXT,
-		data BLOB
-	)''')
-
->>>>>>> Stashed changes
 # Giving different arrays to handle colour points of different colour
 bpoints = [deque(maxlen=1024)]
 gpoints = [deque(maxlen=1024)]
@@ -133,20 +69,9 @@ while ret:
 
     # Check if the countdown has ended
     if remaining_time <= 0:
-<<<<<<< Updated upstream
         cv2.imwrite('paintWindow.png', paintWindow)
         cv2.destroyAllWindows()
-=======
-        cv2.destroyAllWindows()
-        # Store the image in the database
-        filename = "paintWindow"+ str(uuid.uuid4())+".png"
-        cv2.imwrite(filename, paintWindow)
-        insert_image(cur,filename)
->>>>>>> Stashed changes
         cap.release()
-        os.remove(filename)
-        display_images(con)
-        con.close()
         exit() 
 
     x, y, c = frame.shape
