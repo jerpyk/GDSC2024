@@ -3,7 +3,12 @@ import cv2
 import numpy as np
 import mediapipe as mp
 from collections import deque
+import time
 
+# timer 
+countdown_time = 30
+
+start_time = time.time()
 
 # Giving different arrays to handle colour points of different colour
 bpoints = [deque(maxlen=1024)]
@@ -24,8 +29,8 @@ kernel = np.ones((5,5),np.uint8)
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
 colorIndex = 0
 
-# Here is code for Canvas setup
-paintWindow = np.zeros((500,650,3)) + 255    #set rgb to 255 (white)
+# Set up the canvas
+paintWindow = np.zeros((480,650,3)) + 255    #set rgb to 255 (white)
 paintWindow = cv2.rectangle(paintWindow, (40,1), (140,65), (0,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (160,1), (255,65), (255,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (275,1), (370,65), (0,255,0), 2)
@@ -56,11 +61,25 @@ while ret:
     # Read each frame from the webcam
     ret, frame = cap.read()
 
-    x, y, c = frame.shape
-
+    # set the current time
+    current_time = time.time()
+    # Calculate the remaining time
+    remaining_time = countdown_time - int(current_time - start_time)
     # Flip the frame vertically
     frame = cv2.flip(frame, 1)
-    #hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # Display the remaining time in the top right corner of the frame
+    cv2.putText(frame, str(remaining_time), (frame.shape[1] - 50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+    # Check if the countdown has ended
+    if remaining_time <= 0:
+        cv2.imwrite('paintWindow.png', paintWindow)
+        cv2.destroyAllWindows()
+        cap.release()
+        exit() 
+
+    x, y, c = frame.shape
+
+    # Chnage from BGR to RGB values
     framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     frame = cv2.rectangle(frame, (40,1), (140,65), (0,0,0), 2)
@@ -73,7 +92,6 @@ while ret:
     cv2.putText(frame, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-    #frame = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
     # Get hand landmark prediction
     result = hands.process(framergb)
@@ -124,26 +142,30 @@ while ret:
                 green_index = 0
                 red_index = 0
                 yellow_index = 0
-
+                # paint everything white except the palette boxes
                 paintWindow[67:,:,:] = 255
+            # Blue palette
             elif 160 <= center[0] <= 255:
-                    colorIndex = 0 # Blue
+                    colorIndex = 0 
                     # set cursor RGB value (BGR)
                     red = 0
                     green = 0
                     blue = 255
+            # Green palette
             elif 275 <= center[0] <= 370:
-                    colorIndex = 1 # Green
+                    colorIndex = 1 
                     red = 0
                     green = 255
                     blue = 0
+            # Red palette
             elif 390 <= center[0] <= 485:
-                    colorIndex = 2 # Red
+                    colorIndex = 2 
                     red = 255
                     green = 0
                     blue = 0
+            # Yellow palette
             elif 505 <= center[0] <= 600:
-                    colorIndex = 3 # Yellow
+                    colorIndex = 3 
                     red = 255
                     green = 255
                     blue = 0
@@ -156,7 +178,7 @@ while ret:
                 rpoints[red_index].appendleft(center)
             elif colorIndex == 3:
                 ypoints[yellow_index].appendleft(center)
-    # Append the next deques when nothing is detected to avois messing up
+    # Append the next deques when nothing is detected to avoids messing up
     else:
         bpoints.append(deque(maxlen=512))
         blue_index += 1
@@ -169,11 +191,6 @@ while ret:
 
     # Draw lines of all the colors on the canvas and frame
     points = [bpoints, gpoints, rpoints, ypoints]
-    # for j in range(len(points[0])):
-    #         for k in range(1, len(points[0][j])):
-    #             if points[0][j][k - 1] is None or points[0][j][k] is None:
-    #                 continue
-    #             cv2.line(paintWindow, points[0][j][k - 1], points[0][j][k], colors[0], 2)
     for i in range(len(points)):
         for j in range(len(points[i])):
             for k in range(1, len(points[i][j])):
@@ -185,6 +202,7 @@ while ret:
                 
 
     cv2.imshow("Output", frame) 
+    cv2.moveWindow("Output", 650, 0)
     cv2.imshow("Paint", paintWindow)
 
     if cv2.waitKey(1) == ord('q'):
