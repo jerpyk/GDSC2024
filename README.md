@@ -1,6 +1,8 @@
 # GDSC2024 Hackathon Project
 
 <img src="https://res.cloudinary.com/startup-grind/image/upload/c_fill,w_500,h_500,g_center/c_fill,dpr_2.0,f_auto,g_center,q_auto:good/v1/gcs/platform-data-dsc/events/GDSC_Hacks_Stacked-02_fIG7EsH.png" width="300">
+<img width="863" alt="gdsc" src="https://github.com/jerpyk/GDSC2024/assets/94061401/edde731b-25c0-4925-860c-97cc705c1ca0">
+
 
 ### *Finger Painter - Move, Draw, Go!*
 Our project is a 2-D motion tracking simulator for simple gaming and entertainment.
