@@ -26,18 +26,7 @@ colorIndex = 0
 
 # Set up the canvas
 paintWindow = np.zeros((480,650,3)) + 255    # set rgb to 255 (white)
-paintWindow = cv2.rectangle(paintWindow, (40,1), (140,65), (0,0,0), 2)
-paintWindow = cv2.rectangle(paintWindow, (160,1), (255,65), (255,0,0), 2)
-paintWindow = cv2.rectangle(paintWindow, (275,1), (370,65), (0,255,0), 2)
-paintWindow = cv2.rectangle(paintWindow, (390,1), (485,65), (0,0,255), 2)
-paintWindow = cv2.rectangle(paintWindow, (505,1), (600,65), (0,255,255), 2)
 
-# Put the text in for the palette boxes
-cv2.putText(paintWindow, "CLEAR", (49, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-cv2.putText(paintWindow, "BLUE", (185, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-cv2.putText(paintWindow, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-cv2.putText(paintWindow, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-cv2.putText(paintWindow, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 cv2.namedWindow('Paint', cv2.WINDOW_AUTOSIZE)
 
 
@@ -65,7 +54,7 @@ while ret:
     # Flip the frame vertically
     frame = cv2.flip(frame, 1)
     # Display the remaining time in the top right corner of the frame
-    cv2.putText(frame, str(remaining_time), (frame.shape[1] - 50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(frame, str(remaining_time), (frame.shape[1] - 50, 460), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
     # Check if the countdown has ended
     if remaining_time <= 0:
@@ -79,16 +68,16 @@ while ret:
     # change from BGR to RGB values
     framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    frame = cv2.rectangle(frame, (40,1), (140,65), (0,0,0), 2)
+    frame = cv2.rectangle(frame, (40,1), (140,65), (255,255,255), 2)
     frame = cv2.rectangle(frame, (160,1), (255,65), (255,0,0), 2)
     frame = cv2.rectangle(frame, (275,1), (370,65), (0,255,0), 2)
     frame = cv2.rectangle(frame, (390,1), (485,65), (0,0,255), 2)
     frame = cv2.rectangle(frame, (505,1), (600,65), (0,255,255), 2)
-    cv2.putText(frame, "CLEAR", (49, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(frame, "BLUE", (185, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(frame, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(frame, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(frame, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
+    cv2.putText(frame, "CLEAR", (49, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "BLUE", (185, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
+    cv2.putText(frame, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
 
     # hand landmark
     result = hands.process(framergb)
@@ -137,7 +126,7 @@ while ret:
                 red_index = 0
                 yellow_index = 0
                 # paint everything white except the palette boxes
-                paintWindow[67:,:,:] = 255
+                #paintWindow[67:,:,:] = 255
             # Blue palette
             elif 160 <= center[0] <= 255:
                     colorIndex = 0 
@@ -191,8 +180,7 @@ while ret:
                 if points[i][j][k - 1] is None or points[i][j][k] is None:
                     continue
                 cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[i], 2)
-                if not center[1] <= 65:
-                    cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
+                cv2.line(paintWindow, points[i][j][k - 1], points[i][j][k], colors[i], 2)
                 
 
     cv2.imshow("Output", frame) 
