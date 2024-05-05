@@ -8,6 +8,11 @@ Our project is a 2-D motion tracking simulator for simple gaming and entertainme
 The purpose is to provide the user real-time drawing experience using their hand movement instead of a typical mouse drawing. When the user's palm is open, the pen is activated, and when it is not, the pen is deactivated.
 
 After the timer is up, user's drawing is captured and saved.
+<br/>
+<br/>
+<br/>
+<br/>
+![paintWindow](https://github.com/jerpyk/GDSC2024/assets/127615531/167e1c57-4216-4648-a9b7-19ff93c1b87e)
 
 The languages and libraries used for this projects:
 - **Python**
