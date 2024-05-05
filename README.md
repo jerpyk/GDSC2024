@@ -16,8 +16,6 @@ The languages and libraries used for this projects:
 - **MediaPipe**
 - **Numpy**
 
-T
-
 To set up your device, you must install **OpenCV**, **MediaPipe**, and **Numpy** packages:
 
 `pip install opencv-python`
