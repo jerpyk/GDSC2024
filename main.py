@@ -1,4 +1,3 @@
-# All the imports go here
 import cv2
 import numpy as np
 import mediapipe as mp
@@ -7,7 +6,6 @@ import time
 
 # timer 
 countdown_time = 30
-
 start_time = time.time()
 
 # Giving different arrays to handle colour points of different colour
@@ -16,27 +14,25 @@ gpoints = [deque(maxlen=1024)]
 rpoints = [deque(maxlen=1024)]
 ypoints = [deque(maxlen=1024)]
 
-
-# These indexes will be used to mark the points in particular arrays of specific colour
 blue_index = 0
 green_index = 0
 red_index = 0
 yellow_index = 0
 
-#The kernel to be used for dilation purpose 
 kernel = np.ones((5,5),np.uint8)
 
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
 colorIndex = 0
 
 # Set up the canvas
-paintWindow = np.zeros((480,650,3)) + 255    #set rgb to 255 (white)
+paintWindow = np.zeros((480,650,3)) + 255    # set rgb to 255 (white)
 paintWindow = cv2.rectangle(paintWindow, (40,1), (140,65), (0,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (160,1), (255,65), (255,0,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (275,1), (370,65), (0,255,0), 2)
 paintWindow = cv2.rectangle(paintWindow, (390,1), (485,65), (0,0,255), 2)
 paintWindow = cv2.rectangle(paintWindow, (505,1), (600,65), (0,255,255), 2)
 
+# Put the text in for the palette boxes
 cv2.putText(paintWindow, "CLEAR", (49, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 cv2.putText(paintWindow, "BLUE", (185, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 cv2.putText(paintWindow, "GREEN", (298, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
@@ -45,20 +41,21 @@ cv2.putText(paintWindow, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,
 cv2.namedWindow('Paint', cv2.WINDOW_AUTOSIZE)
 
 
-# initialize mediapipe
+# mediapipe initialization
 mpHands = mp.solutions.hands
 hands = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7)
 mpDraw = mp.solutions.drawing_utils
 
+# set the RGB value start as blue 
 red = 0
 green = 0
 blue = 255
 
-# Initialize the webcam
+# camera initialization
 cap = cv2.VideoCapture(0)
 ret = True
 while ret:
-    # Read each frame from the webcam
+    # frame reading 
     ret, frame = cap.read()
 
     # set the current time
@@ -79,7 +76,7 @@ while ret:
 
     x, y, c = frame.shape
 
-    # Chnage from BGR to RGB values
+    # change from BGR to RGB values
     framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     frame = cv2.rectangle(frame, (40,1), (140,65), (0,0,0), 2)
@@ -93,24 +90,21 @@ while ret:
     cv2.putText(frame, "RED", (420, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(frame, "YELLOW", (520, 33), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2, cv2.LINE_AA)
 
-    # Get hand landmark prediction
+    # hand landmark
     result = hands.process(framergb)
 
-    # post process the result
+    # post process the hand landmarks
     if result.multi_hand_landmarks:
         landmarks = []
         for handslms in result.multi_hand_landmarks:
             for lm in handslms.landmark:
-                # print(id, lm)
-                # print(lm.x)
-                # print(lm.y)
                 lmx = int(lm.x * 640)
                 lmy = int(lm.y * 480)
 
                 landmarks.append([lmx, lmy])
 
 
-            # Drawing landmarks on frames
+            # draw landmarks on camera frame
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
         sum_x = sum(lm[0] for lm in landmarks)
         sum_y = sum(lm[1] for lm in landmarks)
@@ -189,7 +183,7 @@ while ret:
         ypoints.append(deque(maxlen=512))
         yellow_index += 1
 
-    # Draw lines of all the colors on the canvas and frame
+    # draw lines of each colour based on the points of the palette on the camera frame and canvas
     points = [bpoints, gpoints, rpoints, ypoints]
     for i in range(len(points)):
         for j in range(len(points[i])):
@@ -208,6 +202,6 @@ while ret:
     if cv2.waitKey(1) == ord('q'):
         break
 
-# release the webcam and destroy all active windows
+#  when q is pressed, exit 
 cap.release()
 cv2.destroyAllWindows()
