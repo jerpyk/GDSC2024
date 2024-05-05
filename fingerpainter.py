@@ -2,8 +2,9 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-from collections import deque
-
+import os
+from os import listdir
+from collections import deque    
 
 # Giving different arrays to handle colour points of different colour
 bpoints = [deque(maxlen=1024)]
@@ -23,12 +24,19 @@ kernel = np.ones((5,5),np.uint8)
 
 colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (0, 255, 255)]
 colorIndex = 0
-img = cv2.imread('apple.jpg')
-size = 100
-img = cv2.resize(img, (size,size))
 
-gryImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+dir = 'C:/Users/joyha/OneDrive/Desktop/GDSC/GDSC2024/images'
+enum_images = enumerate(os.listdir(dir))
+size = 100
+_, img = next(enum_images)
+img = cv2.imread(os.path.join(dir, str(img)))
+new_img = cv2.resize(img, (size,size))
+gryImg = cv2.cvtColor(new_img, cv2.COLOR_BGR2GRAY)
 ret, mask = cv2.threshold(gryImg, 1, 255, cv2.THRESH_BINARY)
+
+# img = cv2.resize(img, (size,size))
+# gryImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# ret, mask = cv2.threshold(gryImg, 1, 255, cv2.THRESH_BINARY)
 
 # Here is code for Canvas setup
 paintWindow = np.zeros((500,650,3)) + 255    #set rgb to 255 (white)
@@ -64,7 +72,10 @@ while ret:
 
     region = frame[-size-10:-10, -size-10:-10]
     region[np.where(mask)] = 0
-    region += img
+    region += new_img
+    # region = frame[-size-10:-10, -size-10:-10]
+    # region[np.where(mask)] = 0
+    # region += img
     x, y, c = frame.shape
 
     # Flip the frame vertically
@@ -178,11 +189,6 @@ while ret:
 
     # Draw lines of all the colors on the canvas and frame
     points = [bpoints, gpoints, rpoints, ypoints]
-    # for j in range(len(points[0])):
-    #         for k in range(1, len(points[0][j])):
-    #             if points[0][j][k - 1] is None or points[0][j][k] is None:
-    #                 continue
-    #             cv2.line(paintWindow, points[0][j][k - 1], points[0][j][k], colors[0], 2)
     for i in range(len(points)):
         for j in range(len(points[i])):
             for k in range(1, len(points[i][j])):
@@ -196,9 +202,15 @@ while ret:
     cv2.imshow("Output", frame) 
     cv2.imshow("Paint", paintWindow)
 
-    if cv2.waitKey(1) == ord('q'):
+    if cv2.waitKey(33) == ord('n'):
+        _, img = next(enum_images)
+        img = cv2.imread(os.path.join(dir, str(img)))
+        new_img = cv2.resize(img, (size,size))
+        gryImg = cv2.cvtColor(new_img, cv2.COLOR_BGR2GRAY)
+        ret, mask = cv2.threshold(gryImg, 1, 255, cv2.THRESH_BINARY)
+        continue
+    elif cv2.waitKey(33) == ord('q'):
         break
-
 # release the webcam and destroy all active windows
 cap.release()
 cv2.destroyAllWindows()
