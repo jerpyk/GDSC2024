@@ -6,12 +6,16 @@
 
 ### *Finger Painter - Move, Draw, Go!*
 Our project is a 2-D motion tracking simulator for simple gaming and entertainment.
+- The main branch contains only the drawing simulator without the SQL implementation
+- The main1 branch contains the SQL database with recorded paintings
 
 The languages and libraries used for this projects:
 - **Python**
 - **OpenCV**
 - **MediaPipe**
 - **Numpy**
+
+T
 
 To set up your device, you must install **OpenCV**, **MediaPipe**, and **Numpy** packages:
 
